@@ -53,7 +53,7 @@ const useTasks = () => {
 
 const TaskProvider = ({ children }: TaskProviderProps) => {
 
-  const { user, accessToken } = useAuth();
+  const { user } = useAuth();
   const [tasks, setTasks] = useState<ITask[]>(
     user ? user.tasks : []
   );
