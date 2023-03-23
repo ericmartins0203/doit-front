@@ -13,12 +13,18 @@ interface SearchData {
 
 export const SearchBox = () => {
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const { SearchTask } = useTasks();
+  const { SearchTask, search, setSearch, loadTasks, setNotFound } = useTasks();
   const { accessToken } = useAuth();
 
   const handleSearch = ({ title }: SearchData) => {
     SearchTask(title, accessToken);
   };
+
+  const back = async () => {
+    await loadTasks(accessToken)
+    setNotFound(false)
+    setSearch(false)
+  }
 
   const { register, handleSubmit } = useForm();
 
@@ -66,6 +72,20 @@ export const SearchBox = () => {
         >
           Adicionar nova tarefa
         </Button>
+        { search &&
+        <Button
+          bg="purple.500"
+          color="white"
+          paddingX="16"
+          ml={["0", "0", "4"]}
+          h="60px"
+          borderRadius="8px"
+          onClick={back}
+          mt={["4", "4", "0"]}
+          _hover={{ bg: "purple.600" }}
+        >
+          Voltar
+        </Button>}
       </Flex>
     </>
   );

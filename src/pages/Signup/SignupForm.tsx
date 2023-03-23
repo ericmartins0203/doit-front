@@ -70,8 +70,8 @@ export const SignupForm = ({
           icon={FaLock}
           label="Confirmação de senha"
           type="password"
-          error={errors.confirm_password}
-          {...register("confirm_password")}
+          error={errors.passwordConfirmation}
+          {...register("passwordConfirmation")}
         />
       </VStack>
       <Button

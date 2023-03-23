@@ -1,24 +1,17 @@
-import { useDisclosure } from "@chakra-ui/react";
-import { useTasks } from "../../contexts/TasksContext";
-import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
+import { useDisclosure } from "@chakra-ui/react";
+import { ITask, useTasks } from "../../contexts/TasksContext";
+import { useAuth } from "../../contexts/AuthContext";
 import { ModalTaskDetail } from "../../components/Modal/ModalTaskDetail";
 import { TaskList } from "./TaskList";
 import { FirstTask } from "./FirstTask";
 import { NotFound } from "./NotFound";
 
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-}
-
 export const Dashboard = () => {
   const [loading, setLoading] = useState(true);
-  const { user, accessToken } = useAuth();
-  const { tasks, loadTasks, notFound, taskNotFound } = useTasks();
-  const [selectedTask, setSelectedTask] = useState<Task>({} as Task);
+  const { accessToken } = useAuth();
+  const { tasks, loadTasks, notFound, taskNotFound, searchList, search } = useTasks();
+  const [ selectedTask, setSelectedTask ] = useState<ITask>({} as ITask);
 
   const {
     isOpen: isTaskDetailOpen,
@@ -27,10 +20,10 @@ export const Dashboard = () => {
   } = useDisclosure();
 
   useEffect(() => {
-    loadTasks(user.id, accessToken).then((res) => setLoading(false));
-  }, []);
+    loadTasks(accessToken).then((res) => setLoading(false));
+  }, [tasks]);
 
-  const handleClick = (task: Task) => {
+  const handleClick = (task: ITask) => {
     setSelectedTask(task);
     onTaskDetailOpen();
   };
@@ -38,10 +31,10 @@ export const Dashboard = () => {
   if (notFound) {
     return (
       <NotFound
-        selectedTask={selectedTask}
-        isTaskDetailOpen={isTaskDetailOpen}
-        onTaskDetailClose={onTaskDetailClose}
-        taskNotFound={taskNotFound}
+      selectedTask={selectedTask}
+      isTaskDetailOpen={isTaskDetailOpen}
+      onTaskDetailClose={onTaskDetailClose}
+      taskNotFound={taskNotFound}
       />
     );
   }
@@ -56,7 +49,7 @@ export const Dashboard = () => {
       {!loading && !tasks.length ? (
         <FirstTask />
       ) : (
-        <TaskList loading={loading} tasks={tasks} handleClick={handleClick} />
+        <TaskList loading={loading} tasks={search ? searchList : tasks} handleClick={handleClick} />
       )}
     </>
   );

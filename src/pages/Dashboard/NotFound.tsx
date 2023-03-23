@@ -2,18 +2,12 @@ import { Box, Center, Heading, Skeleton, Stack, Text } from "@chakra-ui/react";
 import { SearchBox } from "../../components/Form/SearchBox";
 import { Header } from "../../components/Header";
 import { ModalTaskDetail } from "../../components/Modal/ModalTaskDetail";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-}
+import { ITask } from "../../contexts/TasksContext";
 
 interface NotFoundProps {
   isTaskDetailOpen: boolean;
   onTaskDetailClose: () => void;
-  selectedTask: Task;
+  selectedTask: ITask;
   taskNotFound: string;
 }
 
@@ -35,7 +29,7 @@ export const NotFound = ({
         <SearchBox />
         <Center mt="4" textAlign="center" display="flex" flexDir="column">
           <Heading>Não encontramos resultados para:</Heading>
-          <Text fontSize="xl" color="gray.300" fontWeigth="bold">
+          <Text fontSize="xl" color="gray.400" fontweigth="bold">
             {taskNotFound}
           </Text>
           <Box

@@ -25,6 +25,7 @@ interface SignUpData {
   name: string;
   email: string;
   password: string;
+  passwordConfirmation: string
 }
 
 export const Signup = () => {
@@ -48,10 +49,10 @@ export const Signup = () => {
     handleSubmit,
   } = useForm({ resolver: yupResolver(signUpSchema) });
 
-  const handleSignUp = ({ name, email, password }: SignUpData) => {
+  const handleSignUp = ({ name, email, password, passwordConfirmation }: SignUpData) => {
     setLoading(true);
     api
-      .post("/register", { name, email, password })
+      .post("/user", { name, email, password, passwordConfirmation })
       .then((response) => {
         setLoading(false);
         onModalSucessOpen();

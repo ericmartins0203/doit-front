@@ -11,8 +11,8 @@ export const CardSkeleton = ({
   const howMany = Array.from(Array(repeatCount).keys());
   return (
     <>
-      {howMany.map((_) => (
-        <Skeleton {...rest} speed={1} startColor="gray.100" endColor="gray.200">
+      {howMany.map((_, key) => (
+        <Skeleton {...rest} key={key} speed={1} startColor="gray.100" endColor="gray.200">
           <Box w="300px" h="150px" padding="6" />
         </Skeleton>
       ))}

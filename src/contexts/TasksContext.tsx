@@ -7,32 +7,37 @@ import {
   useState,
 } from "react";
 import { api } from "../services/api";
+import { useAuth } from "./AuthContext";
 
 interface TaskProviderProps {
   children: ReactNode;
 }
 
-interface Task {
+export interface ITask {
   id: string;
   title: string;
   description: string;
-  userId: string;
+  createDate: Date;
   completed: boolean;
 }
 
 interface TaskContextData {
-  tasks: Task[];
-  createTask: (data: Omit<Task, "id">, accessToken: string) => Promise<void>;
-  loadTasks: (userId: string, accessToken: string) => Promise<void>;
+  tasks: ITask[];
+  searchList: ITask[];
+  createTask: (data: Partial<ITask>, accessToken: string) => Promise<void>;
+  loadTasks: (accessToken: string) => Promise<void>;
   deleteTask: (taskId: string, accessToken: string) => Promise<void>;
   updateTask: (
     taskId: string,
-    accessToken: string,
-    userId: string
+    data: {completed: boolean},
+    accessToken: string
   ) => Promise<void>;
   SearchTask: (taskTitle: string, accessToken: string) => Promise<void>;
   notFound: boolean;
+  setNotFound: (notFound: boolean) => void;
   taskNotFound: string;
+  search: boolean;
+  setSearch: (search: boolean) => void;
 }
 
 const TaskContext = createContext<TaskContextData>({} as TaskContextData);
@@ -47,31 +52,36 @@ const useTasks = () => {
 };
 
 const TaskProvider = ({ children }: TaskProviderProps) => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [notFound, setnotFound] = useState(false);
+
+  const { user, accessToken } = useAuth();
+  const [tasks, setTasks] = useState<ITask[]>(
+    user ? user.tasks : []
+  );
+  const [search, setSearch] = useState(false);
+  const [searchList, setSearchList] = useState<ITask[]>([])
+  const [notFound, setNotFound] = useState(false);
   const [taskNotFound, setTaskNotFound] = useState("");
 
-  const loadTasks = useCallback(async (userId: string, accessToken: string) => {
+  const loadTasks = useCallback(async (accessToken: string) => {
     try {
-      const response = await api.get(`/tasks?userId=${userId}`, {
+      const response = await api.get('/user', {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-
-      setTasks(response.data);
+      setTasks(response.data.tasks);
     } catch (err) {
       console.log(err);
     }
   }, []);
 
   const createTask = useCallback(
-    async (data: Omit<Task, "id">, accessToken: string) => {
+    async (data: Partial<ITask>, accessToken: string) => {
       api
-        .post("/tasks", data, {
+        .post("/task", data, {
           headers: { Authorization: `Bearer ${accessToken}` },
         })
-        .then((response: AxiosResponse<Task>) =>
+        .then((response: AxiosResponse<ITask>) =>
           setTasks((oldTasks) => [...oldTasks, response.data])
         )
         .catch((err) => console.log(err));
@@ -82,7 +92,7 @@ const TaskProvider = ({ children }: TaskProviderProps) => {
   const deleteTask = useCallback(
     async (taskId: string, accessToken: string) => {
       await api
-        .delete(`/tasks/${taskId}`, {
+        .delete(`/task/${taskId}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -96,24 +106,21 @@ const TaskProvider = ({ children }: TaskProviderProps) => {
     [tasks]
   );
 
+
   const updateTask = useCallback(
-    async (taskId: string, userId: string, accessToken: string) => {
+    async (taskId: string, data: {completed: boolean}, accessToken: string) => {
       await api
-        .patch(
-          `/tasks/${taskId}`,
-          { completed: true, userId },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        )
-        .then((response) => {
+        .patch(`/task/${taskId}`, data, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+       .then((response) => {
           const filteredTasks = tasks.filter((task) => task.id !== taskId);
           const task = tasks.find((task) => task.id === taskId);
 
           if (task) {
-            task.completed = true;
+            task.completed = !task.completed;
             setTasks([...filteredTasks, task]);
           }
         })
@@ -123,20 +130,18 @@ const TaskProvider = ({ children }: TaskProviderProps) => {
   );
 
   const SearchTask = useCallback(
-    async (taskTitle: string, accessToken: string) => {
-      const response = await api.get(`/tasks?title_like=${taskTitle}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+    async (taskTitle: string) => {
+      setSearch(true);
+    
+      const task = tasks.filter((task: ITask) => task.title === taskTitle)
 
-      if (!response.data.length) {
+      if (!task.length) {
         setTaskNotFound(taskTitle);
-        return setnotFound(true);
+        return setNotFound(true);
       }
 
-      setnotFound(false);
-      setTasks(response.data);
+      setSearch(true);
+      return setSearchList(task);
     },
     []
   );
@@ -151,7 +156,11 @@ const TaskProvider = ({ children }: TaskProviderProps) => {
         updateTask,
         SearchTask,
         notFound,
+        setNotFound,
         taskNotFound,
+        search,
+        setSearch,
+        searchList,
       }}
     >
       {children}

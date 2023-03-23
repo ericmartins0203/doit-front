@@ -3,21 +3,19 @@ import { Header } from "../../components/Header";
 import { SearchBox } from "../../components/Form/SearchBox";
 import { CardSkeleton } from "../../components/Skeleton/CardSkeleton";
 import { Card } from "../../components/Card";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-}
-
+import { ITask } from "../../contexts/TasksContext";
+import { useEffect } from "react";
 interface TaskListProps {
   loading: boolean;
-  tasks: Task[];
-  handleClick: (task: Task) => void;
+  tasks: ITask[];
+  handleClick: (task: ITask) => void;
 }
 
 export const TaskList = ({ loading, tasks, handleClick }: TaskListProps) => {
+
+  useEffect(() => {
+  }, [tasks]);
+
   return (
     <Box>
       <Header />
@@ -32,7 +30,7 @@ export const TaskList = ({ loading, tasks, handleClick }: TaskListProps) => {
         {loading ? (
           <CardSkeleton repeatCount={6} />
         ) : (
-          tasks.map((task) => <Card task={task} onClick={handleClick} />)
+          tasks.map((task, key) => <Card task={task} key={key} onClick={handleClick} />)
         )}
       </Grid>
     </Box>

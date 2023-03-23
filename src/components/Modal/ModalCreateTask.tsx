@@ -48,13 +48,12 @@ export const ModalCreateTask = ({ isOpen, onClose }: ModalCreateTaskProps) => {
     resolver: yupResolver(createTaskSchema),
   });
 
-  const { user, accessToken } = useAuth();
+  const { accessToken } = useAuth();
 
   const { createTask } = useTasks();
 
-  const handleCreateTask = (data: TaskData) => {
-    const newData = { ...data, userId: user.id, completed: false };
-    createTask(newData, accessToken).then((res) => onClose());
+  const handleCreateTask = (data: TaskData) => {;
+    createTask(data, accessToken).then((res) => onClose());
   };
 
   return (

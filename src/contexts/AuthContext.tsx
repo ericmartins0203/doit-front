@@ -6,15 +6,20 @@ import {
   useState,
 } from "react";
 import { api } from "../services/api";
+import { ITask } from "./TasksContext";
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-interface User {
-  email: string;
+export interface User {
   id: string;
   name: string;
+  email: string;
+  createDate: string;
+  updateDate: string;
+  password: string
+  tasks: ITask[]
 }
 
 interface AuthState {
@@ -59,7 +64,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   });
 
   const signIn = useCallback(async ({ email, password }: SignInCredentials) => {
-    const response = await api.post("/login", { email, password });
+    const response = await api.post("/user/login", { email, password });
 
     const { accessToken, user } = response.data;
 

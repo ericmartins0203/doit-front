@@ -9,24 +9,17 @@ import {
 } from "@chakra-ui/react";
 import { FaCheck, FaTrash } from "react-icons/fa";
 import { useAuth } from "../../contexts/AuthContext";
-import { useTasks } from "../../contexts/TasksContext";
+import { ITask, useTasks } from "../../contexts/TasksContext";
 import { theme } from "../../styles/theme";
 
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-}
-
 interface CardProps {
-  task: Task;
-  onClick: (task: Task) => void;
+  task: ITask;
+  onClick: (task: ITask) => void;
 }
 
 export const Card = ({ task, onClick }: CardProps) => {
   const { deleteTask, updateTask } = useTasks();
-  const { user, accessToken } = useAuth();
+  const { accessToken } = useAuth();
 
   return (
     <Box
@@ -56,18 +49,31 @@ export const Card = ({ task, onClick }: CardProps) => {
           >
             <FaTrash color={theme.colors.gray[300]} />
           </Center>
-          <Center
+           {task.completed ? <Center
             as="button"
             w="30px"
             h="30px"
             borderWidth="1px"
             borderRadius="5px"
             borderColor="gray.200"
-            bgColor="white"
-            onClick={() => updateTask(task.id, user.id, accessToken)}
+            bgColor="gray.300"
+            onClick={() => updateTask(task.id, {completed:false},  accessToken)}
           >
             <FaCheck color="gray.200" />
-          </Center>
+          </Center> :
+             <Center
+              as="button"
+              w="30px"
+              h="30px"
+              borderWidth="1px"
+              borderRadius="5px"
+              borderColor="gray.200"
+              bgColor="white"
+              onClick={() => updateTask(task.id, {completed:true},  accessToken)}
+            >
+              <FaCheck color="gray.200" />
+            </Center>
+          }
         </HStack>
       </Flex>
       <Box onClick={() => onClick(task)} w="100%" marginTop="4">
@@ -78,7 +84,9 @@ export const Card = ({ task, onClick }: CardProps) => {
           value={task.completed ? 100 : 10}
         ></Progress>
         <Text color="gray.200" mt="3">
-          7 march 2021
+          {new Date(task.createDate).toISOString()
+            .replace(/T/, ' ')
+            .replace(/\..+/, '')}
         </Text>
       </Box>
     </Box>

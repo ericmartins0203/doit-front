@@ -13,32 +13,26 @@ import {
   Progress,
 } from "@chakra-ui/react";
 import { useAuth } from "../../contexts/AuthContext";
-import { useTasks } from "../../contexts/TasksContext";
+import { ITask, useTasks } from "../../contexts/TasksContext";
 import { FaCheck, FaCube, FaTimes, FaTrash } from "react-icons/fa";
 import { theme } from "../../styles/theme";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-}
 
 interface ModalTaskDetailProps {
   isOpen: boolean;
   onClose: () => void;
-  task: Task;
+  task: ITask;
 }
 export const ModalTaskDetail = ({
   isOpen,
   onClose,
   task,
 }: ModalTaskDetailProps) => {
-  const { user, accessToken } = useAuth();
+  const { accessToken } = useAuth();
   const { deleteTask, updateTask } = useTasks();
 
-  const handleComplete = () => {
-    updateTask(task.id, user.id, accessToken);
+    const handleComplete = (completed: boolean) => {
+      console.log(completed)
+    updateTask(task.id, {completed: completed}, accessToken);
   };
 
   const handleDelete = () => {
@@ -71,18 +65,31 @@ export const ModalTaskDetail = ({
             >
               <FaTrash color={theme.colors.gray[300]} />
             </Center>
-            <Center
+            {task.completed ? <Center
               as="button"
               w="30px"
               h="30px"
               borderWidth="1px"
               borderRadius="5px"
               borderColor="gray.200"
-              bgColor="white"
-              onClick={handleComplete}
+              bgColor="gray.300"
+              onClick={() =>handleComplete(false)}
             >
               <FaCheck color="gray.200" />
-            </Center>
+            </Center> :
+            <Center
+            as="button"
+            w="30px"
+            h="30px"
+            borderWidth="1px"
+            borderRadius="5px"
+            borderColor="gray.200"
+            bgColor="white"
+            onClick={() =>handleComplete(true)}
+          >
+            <FaCheck color="gray.200" />
+          </Center>
+            }
             <Center
               onClick={onClose}
               as="button"
@@ -106,8 +113,10 @@ export const ModalTaskDetail = ({
         </ModalBody>
         <Box>
           <Progress colorScheme="purple" value={task.completed ? 100 : 10} />
-          <Text color="gray.200" mt="3">
-            07 March 2021
+          <Text color="gray.200" mt="3" ml="6">
+          { task.createDate && new Date(task.createDate).toISOString()
+            .replace(/T/, ' ')
+            .replace(/\..+/, '')}
           </Text>
         </Box>
       </ModalContent>
